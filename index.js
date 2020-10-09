@@ -30,6 +30,21 @@ World.add(world, walls);
 
 // ლაბირინთის შექმნა
 
+const shuffle = (arr) => {
+    let counter = arr.length;
+
+    while (counter > 0) {
+        const index = Math.floor(Math.random() * counter);
+        counter--;
+
+        const temp = arr[counter];
+        arr[counter] = arr[index];
+        arr[index] = temp;
+    }
+
+    return arr;
+};
+
 const grid = Array(cells)
     .fill(null)
     .map(() => Array(cells).fill(false));
@@ -54,16 +69,49 @@ const stepThroughCell = (row, column) => {
 
     grid[row][column] = true;
 
-    const neighbors = [
-        [row - 1, column],
-        [row, column + 1],
-        [row + 1, column],
-        [row, column - 1]
-    ];
+    const neighbors = shuffle([
+        [row - 1, column, `up`],
+        [row, column + 1, `right`],
+        [row + 1, column, `down`],
+        [row, column - 1, `left`]
+    ]);
 
 
+    for (let neighbor of neighbors) {
+        const [nextRow, nextColumn, direction] = neighbor;
+
+        if (nextRow < 0 || nextRow >= cells || nextColumn < 0 || nextColumn >= cells) {
+            continue;
+        }
+
+        if (grid[nextRow][nextColumn]) {
+            continue;
+        }
+
+        if (direction === ``) {
+            verticals[row][column - 1] = true;
+        } else if (direction === `right`) {
+            verticals[row][column] = true;
+        } else if (direction === `up`) {
+            horizontals[row - 1][column] = true;
+        } else if (direction === `down`) {
+            horizontals[row][column] = true;
+        }
+
+        stepThroughCell(nextRow, nextColumn);
+
+    }
 
 };
 
 stepThroughCell(startRow, startColumn);
-console.log(grid);
+
+horizontals.forEach((row) => {
+    row.forEach((open) => {
+        if (open) {
+            return;
+        }
+
+        const wall = Bodies.rectangle();
+    });
+});
